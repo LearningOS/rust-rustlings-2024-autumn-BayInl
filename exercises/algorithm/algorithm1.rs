@@ -2,7 +2,6 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
@@ -23,19 +22,19 @@ impl<T> Node<T> {
     }
 }
 #[derive(Debug)]
-struct LinkedList<T> {
+struct LinkedList<T: Ord> {
     length: u32,
     start: Option<NonNull<Node<T>>>,
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T: Ord + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T: Ord+ Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -69,20 +68,50 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
+	pub fn merge(mut list_a:LinkedList<T>,mut list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+
+        let mut ret = LinkedList::<T>::new();
+        while list_a.length >0 && list_b.length>0{
+            let a_val = list_a.get(0).unwrap();
+            let b_val = list_b.get(0).unwrap();
+            if a_val <= b_val {
+                ret.add((*a_val).clone());
+                list_a.remove_first();
+            } else {
+                ret.add((*b_val).clone());
+                list_b.remove_first();
+            }
         }
+        while list_a.length > 0{
+            let a_val = list_a.get(0).unwrap();
+            ret.add((*a_val).clone());
+            list_a.remove_first();
+        }
+        while list_b.length > 0 {
+            let b_val = list_b.get(0).unwrap();
+            ret.add((*b_val).clone());
+            list_b.remove_first();
+        }
+        ret
 	}
+    fn remove_first(&mut self){
+        if let Some(start_ptr) = self.start{
+            let next_ptr = unsafe{
+                (*start_ptr.as_ptr()).next
+            };
+            self.start = next_ptr;
+            self.length -= 1;
+            if self.length == 0{
+                self.end = None;
+            }
+        }
+    }
 }
 
 impl<T> Display for LinkedList<T>
 where
-    T: Display,
+    T: Display + std::cmp::Ord,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.start {
@@ -94,7 +123,7 @@ where
 
 impl<T> Display for Node<T>
 where
-    T: Display,
+    T: Display + std::cmp::Ord,
 {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {
         match self.next {

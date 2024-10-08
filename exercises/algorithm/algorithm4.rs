@@ -3,7 +3,6 @@
 	This problem requires you to implement a basic interface for a binary tree
 */
 
-//I AM NOT DONE
 use std::cmp::Ordering;
 use std::fmt::Debug;
 
@@ -50,13 +49,25 @@ where
 
     // Insert a value into the BST
     fn insert(&mut self, value: T) {
-        //TODO
+        match &mut self.root {
+            Some(node)=>{
+                node.insert(value);
+            },
+            None =>{
+                self.root = Some(
+                    Box::new(TreeNode{
+                        value,
+                        left: None,
+                        right: None,
+                    })
+                )
+            }
+        }
     }
 
     // Search for a value in the BST
     fn search(&self, value: T) -> bool {
-        //TODO
-        true
+        self.root.as_ref().map_or(false,|node|node.search(&value))
     }
 }
 
@@ -66,7 +77,45 @@ where
 {
     // Insert a node into the tree
     fn insert(&mut self, value: T) {
-        //TODO
+        if self.value < value{
+            // insert into right branch
+            match &mut self.right{
+                Some(right_node) =>{
+                    right_node.insert(value);
+                },
+                None =>{
+                    self.right = Some(Box::new(TreeNode{
+                        value,
+                        left: None,
+                        right: None,
+                    }))
+                }
+            }
+        }
+        else if self.value > value{
+            match &mut self.left {
+                Some(left_node) => {
+                    left_node.insert(value);
+                },
+                None => {
+                    self.left = Some(Box::new(TreeNode {
+                        value,
+                        left: None,
+                        right: None,
+                    }))
+                }
+            }
+        }
+        // if self.value == value, we don't need to insert any node (assuming no duplicates allowed).
+    }
+    fn search(&self, value: &T) -> bool{
+        if &self.value == value {
+            true
+        } else if &self.value < value {
+            self.right.as_ref().map_or(false, |node| node.search(value))
+        } else {
+            self.left.as_ref().map_or(false, |node| node.search(value))
+        }
     }
 }
 
